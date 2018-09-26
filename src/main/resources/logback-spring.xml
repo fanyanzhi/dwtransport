@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+	<property name="log.path" value="/data/transportlogs" />
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<timestamp>
+					<fieldName>timestamp</fieldName>
+					<pattern>yyyy-MM-dd HH:mm:ss.SSS</pattern>
+				</timestamp>
+				<pattern>
+					<pattern>
+						{
+						"level": "%level",
+						"thread": "%thread",
+						"filename": "%logger",
+						"message": "%message",
+						"has_message": "#asJson{%mdc{hasMessage}}",
+						"json_message": "#asJson{%message}"
+						}
+					</pattern>
+				</pattern>
+				<stackTrace>
+				</stackTrace>
+			</providers>
+		</encoder>
+	</appender>
+
+	<springProfile name="dev">
+		<logger name="org.springframework.web" level="WARN" />
+		<logger name="com.ksyun.ks3" level="WARN" />
+		<logger name="dataworker" level="DEBUG" />
+		<root level="INFO">
+			<appender-ref ref="CONSOLE" />
+		</root>
+	</springProfile>
+	
+	<springProfile name="serdev">
+		<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+				<fileNamePattern>${log.path}/dw-ng.%d{yyyy-MM-dd}.log</fileNamePattern>
+				<maxHistory>7</maxHistory>
+			</rollingPolicy>
+			<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+				<providers>
+					<timestamp>
+						<fieldName>timestamp</fieldName>
+						<pattern>yyyy-MM-dd HH:mm:ss.SSS</pattern>
+					</timestamp>
+					<pattern>
+						<pattern>
+							{
+							"level": "%level",
+							"lineno": "#asLong{%line}",
+							"thread": "%thread",
+							"filename": "%logger",
+							"message": "%message",
+							"has_message": "#asJson{%mdc{hasMessage}}",
+							"json_message": "#asJson{%message}"
+							}
+						</pattern>
+					</pattern>
+					<stackTrace>
+					</stackTrace>
+				</providers>
+			</encoder>
+		</appender>
+
+		<logger name="org.springframework.web" level="WARN" />
+		<logger name="com.ksyun.ks3" level="WARN" />
+		<logger name="dataworker" level="DEBUG" />
+		<root level="INFO">
+			<appender-ref ref="FILE"/>
+		</root>
+	</springProfile>
+</configuration>
